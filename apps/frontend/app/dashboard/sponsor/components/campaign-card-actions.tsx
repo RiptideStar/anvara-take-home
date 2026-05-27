@@ -6,7 +6,13 @@ import type { Campaign } from '@/lib/types';
 import { CampaignFormModal } from './campaign-form-modal';
 import { deleteCampaignAction } from '../actions';
 
-export function CampaignCardActions({ campaign }: { campaign: Campaign }) {
+export function CampaignCardActions({
+  campaign,
+  onDeletingChange,
+}: {
+  campaign: Campaign;
+  onDeletingChange?: (deleting: boolean) => void;
+}) {
   const [editing, setEditing] = useState(false);
 
   return (
@@ -22,6 +28,7 @@ export function CampaignCardActions({ campaign }: { campaign: Campaign }) {
         id={campaign.id}
         action={deleteCampaignAction}
         successMessage="Campaign deleted"
+        onDeletingChange={onDeletingChange}
       />
       {editing && <CampaignFormModal campaign={campaign} onClose={() => setEditing(false)} />}
     </div>

@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import type { AdSlot } from '@/lib/types';
 import { AdSlotCardActions } from './ad-slot-card-actions';
 
@@ -6,8 +9,13 @@ interface AdSlotCardProps {
 }
 
 export function AdSlotCard({ adSlot }: AdSlotCardProps) {
+  const [removing, setRemoving] = useState(false);
   return (
-    <div className="flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)]">
+    <div
+      className={`flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)] ${
+        removing ? 'removing' : ''
+      }`}
+    >
       <div className="mb-3 flex items-start justify-between gap-3">
         <h3 className="text-lg leading-snug">{adSlot.name}</h3>
         <span className="eyebrow shrink-0 rounded-full border border-[var(--color-border)] px-2 py-1">
@@ -38,7 +46,7 @@ export function AdSlotCard({ adSlot }: AdSlotCardProps) {
         </span>
       </div>
 
-      <AdSlotCardActions adSlot={adSlot} />
+      <AdSlotCardActions adSlot={adSlot} onDeletingChange={setRemoving} />
     </div>
   );
 }

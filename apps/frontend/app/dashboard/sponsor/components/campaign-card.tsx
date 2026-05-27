@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import type { Campaign } from '@/lib/types';
 import { StatusBadge } from '@/app/components/status-badge';
 import { CampaignCardActions } from './campaign-card-actions';
@@ -18,12 +21,17 @@ function formatDate(value: string): string {
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
+  const [removing, setRemoving] = useState(false);
   const budget = Number(campaign.budget);
   const spent = Number(campaign.spent);
   const progress = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
 
   return (
-    <div className="group flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)]">
+    <div
+      className={`group flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)] ${
+        removing ? 'removing' : ''
+      }`}
+    >
       <div className="mb-3 flex items-start justify-between gap-3">
         <h3 className="text-lg leading-snug">{campaign.name}</h3>
         <StatusBadge status={campaign.status} />
@@ -52,7 +60,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         {formatDate(campaign.startDate)} — {formatDate(campaign.endDate)}
       </div>
 
-      <CampaignCardActions campaign={campaign} />
+      <CampaignCardActions campaign={campaign} onDeletingChange={setRemoving} />
     </div>
   );
 }

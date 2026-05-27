@@ -6,7 +6,13 @@ import type { AdSlot } from '@/lib/types';
 import { AdSlotFormModal } from './ad-slot-form-modal';
 import { deleteAdSlotAction } from '../actions';
 
-export function AdSlotCardActions({ adSlot }: { adSlot: AdSlot }) {
+export function AdSlotCardActions({
+  adSlot,
+  onDeletingChange,
+}: {
+  adSlot: AdSlot;
+  onDeletingChange?: (deleting: boolean) => void;
+}) {
   const [editing, setEditing] = useState(false);
 
   return (
@@ -18,7 +24,12 @@ export function AdSlotCardActions({ adSlot }: { adSlot: AdSlot }) {
       >
         Edit
       </button>
-      <DeleteConfirm id={adSlot.id} action={deleteAdSlotAction} successMessage="Ad slot deleted" />
+      <DeleteConfirm
+        id={adSlot.id}
+        action={deleteAdSlotAction}
+        successMessage="Ad slot deleted"
+        onDeletingChange={onDeletingChange}
+      />
       {editing && <AdSlotFormModal adSlot={adSlot} onClose={() => setEditing(false)} />}
     </div>
   );

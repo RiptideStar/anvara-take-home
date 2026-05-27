@@ -24,21 +24,32 @@ interface DeleteConfirmProps {
   id: string;
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
   successMessage?: string;
+  /** Notified when deletion starts/aborts so the parent can animate the row out. */
+  onDeletingChange?: (deleting: boolean) => void;
 }
 
 /**
  * Inline two-step delete. The "Delete" button swaps to "Delete? Yes / No".
  * On success the parent list is revalidated and this row unmounts.
  */
-export function DeleteConfirm({ id, action, successMessage = 'Deleted' }: DeleteConfirmProps) {
+export function DeleteConfirm({
+  id,
+  action,
+  successMessage = 'Deleted',
+  onDeletingChange,
+}: DeleteConfirmProps) {
   const [confirming, setConfirming] = useState(false);
   const [state, formAction] = useActionState(action, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (state.success) toast(successMessage);
-    else if (state.error) toast(state.error, 'error');
-  }, [state.success, state.error, successMessage, toast]);
+    if (state.success) {
+      toast(successMessage);
+    } else if (state.error) {
+      toast(state.error, 'error');
+      onDeletingChange?.(false); // delete failed — cancel the fade-out
+    }
+  }, [state.success, state.error, successMessage, toast, onDeletingChange]);
 
   if (!confirming) {
     return (
@@ -53,7 +64,11 @@ export function DeleteConfirm({ id, action, successMessage = 'Deleted' }: Delete
   }
 
   return (
-    <form action={formAction} className="flex items-center gap-2">
+    <form
+      action={formAction}
+      onSubmit={() => onDeletingChange?.(true)}
+      className="flex items-center gap-2"
+    >
       <input type="hidden" name="id" value={id} />
       <span className="text-xs text-[var(--color-muted)]">Delete?</span>
       <ConfirmSubmit />
