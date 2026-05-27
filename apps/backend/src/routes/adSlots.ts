@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type IRouter } from 'express';
-import { prisma } from '../db.js';
+import { prisma, AdSlotType } from '../db.js';
 import { getParam } from '../utils/helpers.js';
 import { requireAuth, requirePublisher } from '../auth.js';
 
@@ -169,7 +169,78 @@ router.post('/:id/unbook', async (req: Request, res: Response) => {
   }
 });
 
-// TODO: Add PUT /api/ad-slots/:id endpoint
-// TODO: Add DELETE /api/ad-slots/:id endpoint
+// PUT /api/ad-slots/:id - Update an owned ad slot
+router.put('/:id', requireAuth, requirePublisher, async (req: Request, res: Response) => {
+  try {
+    const id = getParam(req.params.id);
+
+    // Ownership check: not-owned and non-existent both yield 404.
+    const existing = await prisma.adSlot.findFirst({
+      where: { id, publisher: { userId: req.user!.id } },
+      select: { id: true },
+    });
+    if (!existing) {
+      res.status(404).json({ error: 'Ad slot not found' });
+      return;
+    }
+
+    const { name, description, type, basePrice, isAvailable } = req.body;
+
+    // Validate provided fields.
+    if (basePrice !== undefined && (!Number.isFinite(Number(basePrice)) || Number(basePrice) <= 0)) {
+      res.status(400).json({ error: 'basePrice must be a positive number' });
+      return;
+    }
+    if (type !== undefined && !Object.values(AdSlotType).includes(type)) {
+      res.status(400).json({ error: 'type is not a valid ad slot type' });
+      return;
+    }
+    if (isAvailable !== undefined && typeof isAvailable !== 'boolean') {
+      res.status(400).json({ error: 'isAvailable must be a boolean' });
+      return;
+    }
+
+    const adSlot = await prisma.adSlot.update({
+      where: { id },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+        ...(type !== undefined && { type }),
+        ...(basePrice !== undefined && { basePrice: Number(basePrice) }),
+        ...(isAvailable !== undefined && { isAvailable }),
+      },
+      include: {
+        publisher: { select: { id: true, name: true } },
+      },
+    });
+
+    res.json(adSlot);
+  } catch (error) {
+    console.error('Error updating ad slot:', error);
+    res.status(500).json({ error: 'Failed to update ad slot' });
+  }
+});
+
+// DELETE /api/ad-slots/:id - Delete an owned ad slot
+router.delete('/:id', requireAuth, requirePublisher, async (req: Request, res: Response) => {
+  try {
+    const id = getParam(req.params.id);
+
+    const existing = await prisma.adSlot.findFirst({
+      where: { id, publisher: { userId: req.user!.id } },
+      select: { id: true },
+    });
+    if (!existing) {
+      res.status(404).json({ error: 'Ad slot not found' });
+      return;
+    }
+
+    await prisma.adSlot.delete({ where: { id } });
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting ad slot:', error);
+    res.status(500).json({ error: 'Failed to delete ad slot' });
+  }
+});
 
 export default router;

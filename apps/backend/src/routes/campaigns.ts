@@ -1,5 +1,5 @@
 import { Router, type Request, type Response, type IRouter } from 'express';
-import { prisma } from '../db.js';
+import { prisma, CampaignStatus } from '../db.js';
 import { getParam } from '../utils/helpers.js';
 import { requireAuth, requireSponsor } from '../auth.js';
 
@@ -109,7 +109,85 @@ router.post('/', requireAuth, requireSponsor, async (req: Request, res: Response
   }
 });
 
-// TODO: Add PUT /api/campaigns/:id endpoint
-// Update campaign details (name, budget, dates, status, etc.)
+// PUT /api/campaigns/:id - Update an owned campaign
+router.put('/:id', requireAuth, requireSponsor, async (req: Request, res: Response) => {
+  try {
+    const id = getParam(req.params.id);
+
+    // Ownership check: not-owned and non-existent both yield 404.
+    const existing = await prisma.campaign.findFirst({
+      where: { id, sponsor: { userId: req.user!.id } },
+      select: { id: true },
+    });
+    if (!existing) {
+      res.status(404).json({ error: 'Campaign not found' });
+      return;
+    }
+
+    const { name, description, budget, cpmRate, cpcRate, startDate, endDate, status } = req.body;
+
+    // Validate provided fields.
+    if (budget !== undefined && (!Number.isFinite(Number(budget)) || Number(budget) <= 0)) {
+      res.status(400).json({ error: 'budget must be a positive number' });
+      return;
+    }
+    if (startDate !== undefined && Number.isNaN(new Date(startDate).getTime())) {
+      res.status(400).json({ error: 'startDate is invalid' });
+      return;
+    }
+    if (endDate !== undefined && Number.isNaN(new Date(endDate).getTime())) {
+      res.status(400).json({ error: 'endDate is invalid' });
+      return;
+    }
+    if (status !== undefined && !Object.values(CampaignStatus).includes(status)) {
+      res.status(400).json({ error: 'status is not a valid campaign status' });
+      return;
+    }
+
+    const campaign = await prisma.campaign.update({
+      where: { id },
+      data: {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+        ...(budget !== undefined && { budget: Number(budget) }),
+        ...(cpmRate !== undefined && { cpmRate }),
+        ...(cpcRate !== undefined && { cpcRate }),
+        ...(startDate !== undefined && { startDate: new Date(startDate) }),
+        ...(endDate !== undefined && { endDate: new Date(endDate) }),
+        ...(status !== undefined && { status }),
+      },
+      include: {
+        sponsor: { select: { id: true, name: true } },
+      },
+    });
+
+    res.json(campaign);
+  } catch (error) {
+    console.error('Error updating campaign:', error);
+    res.status(500).json({ error: 'Failed to update campaign' });
+  }
+});
+
+// DELETE /api/campaigns/:id - Delete an owned campaign
+router.delete('/:id', requireAuth, requireSponsor, async (req: Request, res: Response) => {
+  try {
+    const id = getParam(req.params.id);
+
+    const existing = await prisma.campaign.findFirst({
+      where: { id, sponsor: { userId: req.user!.id } },
+      select: { id: true },
+    });
+    if (!existing) {
+      res.status(404).json({ error: 'Campaign not found' });
+      return;
+    }
+
+    await prisma.campaign.delete({ where: { id } });
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting campaign:', error);
+    res.status(500).json({ error: 'Failed to delete campaign' });
+  }
+});
 
 export default router;
