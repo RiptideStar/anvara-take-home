@@ -1,4 +1,5 @@
 import type { AdSlot } from '@/lib/types';
+import { AdSlotCardActions } from './ad-slot-card-actions';
 
 interface AdSlotCardProps {
   adSlot: AdSlot;
@@ -36,7 +37,7 @@ export function AdSlotCard({ adSlot }: AdSlotCardProps) {
         </span>
       </div>
 
-      {/* TODO: Add edit/toggle availability buttons */}
+      <AdSlotCardActions adSlot={adSlot} />
     </div>
   );
 }

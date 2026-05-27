@@ -1,4 +1,5 @@
 import type { Campaign } from '@/lib/types';
+import { CampaignCardActions } from './campaign-card-actions';
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -50,7 +51,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         {new Date(campaign.endDate).toLocaleDateString()}
       </div>
 
-      {/* TODO: Add edit/view buttons */}
+      <CampaignCardActions campaign={campaign} />
     </div>
   );
 }

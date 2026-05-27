@@ -1,10 +1,28 @@
 // Server-only API client. Forwards the incoming request's cookies to the
 // backend so authenticated, session-scoped endpoints work from Server
 // Components. Do not import this from Client Components.
-import { headers } from 'next/headers';
+import { headers, cookies } from 'next/headers';
 import type { Campaign } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4291';
+
+/**
+ * Calls the backend from a Server Action, forwarding the session cookie so
+ * protected endpoints authenticate. Returns the raw Response so callers can
+ * branch on status and parse error bodies.
+ */
+export async function backendFetch(endpoint: string, init?: RequestInit): Promise<Response> {
+  const cookieStore = await cookies();
+  return fetch(`${API_URL}${endpoint}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      cookie: cookieStore.toString(),
+      ...init?.headers,
+    },
+    cache: 'no-store',
+  });
+}
 
 async function serverFetch<T>(endpoint: string): Promise<T> {
   const incoming = await headers();

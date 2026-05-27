@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { getUserRole } from '@/lib/auth-helpers';
 import { getMyCampaigns } from '@/lib/server-api';
 import { CampaignList } from './components/campaign-list';
+import { CreateCampaignButton } from './components/create-campaign-button';
 
 export default async function SponsorDashboard() {
   const session = await auth.api.getSession({
@@ -28,7 +29,7 @@ export default async function SponsorDashboard() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Campaigns</h1>
-        {/* TODO: Add CreateCampaignButton here */}
+        <CreateCampaignButton />
       </div>
 
       <CampaignList campaigns={campaigns} />

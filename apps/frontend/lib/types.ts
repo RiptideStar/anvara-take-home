@@ -1,5 +1,12 @@
 // Core types matching the Prisma schema
 
+// Shared return shape for Server Actions used with useActionState.
+export interface FormState {
+  success?: boolean;
+  error?: string;
+  fieldErrors?: Record<string, string>;
+}
+
 export type UserRole = 'sponsor' | 'publisher';
 
 export interface Campaign {
