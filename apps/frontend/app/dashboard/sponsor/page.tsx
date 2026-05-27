@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getUserRole } from '@/lib/auth-helpers';
+import { getCampaigns } from '@/lib/api';
 import { CampaignList } from './components/campaign-list';
 
 export default async function SponsorDashboard() {
@@ -19,6 +20,9 @@ export default async function SponsorDashboard() {
     redirect('/');
   }
 
+  // Fetch campaigns on the server. Any failure propagates to error.tsx.
+  const campaigns = await getCampaigns(roleData.sponsorId);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -26,7 +30,7 @@ export default async function SponsorDashboard() {
         {/* TODO: Add CreateCampaignButton here */}
       </div>
 
-      <CampaignList />
+      <CampaignList campaigns={campaigns} />
     </div>
   );
 }

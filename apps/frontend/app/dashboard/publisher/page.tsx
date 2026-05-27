@@ -2,6 +2,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getUserRole } from '@/lib/auth-helpers';
+import { getAdSlots } from '@/lib/api';
 import { AdSlotList } from './components/ad-slot-list';
 
 export default async function PublisherDashboard() {
@@ -19,6 +20,9 @@ export default async function PublisherDashboard() {
     redirect('/');
   }
 
+  // Fetch ad slots on the server. Any failure propagates to error.tsx.
+  const adSlots = await getAdSlots(roleData.publisherId);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -26,7 +30,7 @@ export default async function PublisherDashboard() {
         {/* TODO: Add CreateAdSlotButton here */}
       </div>
 
-      <AdSlotList />
+      <AdSlotList adSlots={adSlots} />
     </div>
   );
 }
