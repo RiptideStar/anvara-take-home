@@ -34,6 +34,10 @@ export const baseConfig = [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': 'warn',
+      // TypeScript's compiler already reports undefined identifiers, and the core
+      // no-undef rule is unaware of TS/DOM globals (e.g. RequestInit). Disable it
+      // for TS files as recommended by typescript-eslint.
+      'no-undef': 'off',
     },
   },
   prettierConfig,
@@ -66,6 +70,10 @@ export const reactConfig = [
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'error',
       'no-console': 'warn',
+      // TypeScript's compiler already reports undefined identifiers, and the core
+      // no-undef rule is unaware of TS/DOM globals (e.g. RequestInit). Disable it
+      // for TS files as recommended by typescript-eslint.
+      'no-undef': 'off',
     },
   },
   {
