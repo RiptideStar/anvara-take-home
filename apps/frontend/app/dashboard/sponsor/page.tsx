@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
 import { getUserRole } from '@/lib/auth-helpers';
-import { getCampaigns } from '@/lib/api';
+import { getMyCampaigns } from '@/lib/server-api';
 import { CampaignList } from './components/campaign-list';
 
 export default async function SponsorDashboard() {
@@ -20,8 +20,9 @@ export default async function SponsorDashboard() {
     redirect('/');
   }
 
-  // Fetch campaigns on the server. Any failure propagates to error.tsx.
-  const campaigns = await getCampaigns(roleData.sponsorId);
+  // Fetch campaigns on the server, forwarding the session cookie. The backend
+  // scopes results to this sponsor. Any failure propagates to error.tsx.
+  const campaigns = await getMyCampaigns();
 
   return (
     <div className="space-y-6">

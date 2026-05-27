@@ -1,18 +1,19 @@
 import { Router, type Request, type Response, type IRouter } from 'express';
 import { prisma } from '../db.js';
 import { getParam } from '../utils/helpers.js';
+import { requireAuth, requireSponsor } from '../auth.js';
 
 const router: IRouter = Router();
 
-// GET /api/campaigns - List all campaigns
-router.get('/', async (req: Request, res: Response) => {
+// GET /api/campaigns - List the authenticated sponsor's campaigns
+router.get('/', requireAuth, requireSponsor, async (req: Request, res: Response) => {
   try {
-    const { status, sponsorId } = req.query;
+    const { status } = req.query;
 
     const campaigns = await prisma.campaign.findMany({
       where: {
+        sponsorId: req.user!.sponsorId,
         ...(status && { status: status as string as 'ACTIVE' | 'PAUSED' | 'COMPLETED' }),
-        ...(sponsorId && { sponsorId: getParam(sponsorId) }),
       },
       include: {
         sponsor: { select: { id: true, name: true, logo: true } },
@@ -28,12 +29,14 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// GET /api/campaigns/:id - Get single campaign with details
-router.get('/:id', async (req: Request, res: Response) => {
+// GET /api/campaigns/:id - Get single owned campaign with details
+router.get('/:id', requireAuth, async (req: Request, res: Response) => {
   try {
     const id = getParam(req.params.id);
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
+    // Scope by owner: a non-owned or non-existent id both yield 404, so we
+    // never reveal whether another sponsor's campaign exists.
+    const campaign = await prisma.campaign.findFirst({
+      where: { id, sponsor: { userId: req.user!.id } },
       include: {
         sponsor: true,
         creatives: true,
@@ -58,8 +61,8 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/campaigns - Create new campaign
-router.post('/', async (req: Request, res: Response) => {
+// POST /api/campaigns - Create a campaign for the authenticated sponsor
+router.post('/', requireAuth, requireSponsor, async (req: Request, res: Response) => {
   try {
     const {
       name,
@@ -71,12 +74,11 @@ router.post('/', async (req: Request, res: Response) => {
       endDate,
       targetCategories,
       targetRegions,
-      sponsorId,
     } = req.body;
 
-    if (!name || !budget || !startDate || !endDate || !sponsorId) {
+    if (!name || !budget || !startDate || !endDate) {
       res.status(400).json({
-        error: 'Name, budget, startDate, endDate, and sponsorId are required',
+        error: 'Name, budget, startDate, and endDate are required',
       });
       return;
     }
@@ -92,7 +94,8 @@ router.post('/', async (req: Request, res: Response) => {
         endDate: new Date(endDate),
         targetCategories: targetCategories || [],
         targetRegions: targetRegions || [],
-        sponsorId,
+        // Ownership comes from the session, never the client payload.
+        sponsorId: req.user!.sponsorId!,
       },
       include: {
         sponsor: { select: { id: true, name: true } },

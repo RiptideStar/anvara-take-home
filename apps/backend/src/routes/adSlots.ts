@@ -1,6 +1,7 @@
 import { Router, type Request, type Response, type IRouter } from 'express';
 import { prisma } from '../db.js';
 import { getParam } from '../utils/helpers.js';
+import { requireAuth, requirePublisher } from '../auth.js';
 
 const router: IRouter = Router();
 
@@ -59,14 +60,14 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// POST /api/ad-slots - Create new ad slot
-router.post('/', async (req: Request, res: Response) => {
+// POST /api/ad-slots - Create an ad slot for the authenticated publisher
+router.post('/', requireAuth, requirePublisher, async (req: Request, res: Response) => {
   try {
-    const { name, description, type, basePrice, publisherId } = req.body;
+    const { name, description, type, basePrice } = req.body;
 
-    if (!name || !type || !basePrice || !publisherId) {
+    if (!name || !type || !basePrice) {
       res.status(400).json({
-        error: 'Name, type, basePrice, and publisherId are required',
+        error: 'Name, type, and basePrice are required',
       });
       return;
     }
@@ -77,7 +78,8 @@ router.post('/', async (req: Request, res: Response) => {
         description,
         type,
         basePrice,
-        publisherId,
+        // Ownership comes from the session, never the client payload.
+        publisherId: req.user!.publisherId!,
       },
       include: {
         publisher: { select: { id: true, name: true } },
