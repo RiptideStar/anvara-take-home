@@ -1,63 +1,169 @@
 @import 'tailwindcss';
 
 /*
- * Tailwind CSS v4 - CSS-first configuration
- * No tailwind.config.js needed! Use CSS custom properties for theming.
- * Modern 2026 best practices: Oxide engine for faster builds, CSS vars for themes.
+ * Anvara design system — editorial / refined marketplace.
+ * Warm paper + ink, deep forest accent, brass hairline detail.
+ * Display: Fraunces (serif). Body/UI: Hanken Grotesk. Wired via next/font.
  */
 
-/* Custom theme variables - modify these to customize the marketplace look */
 :root {
-  /* Primary brand colors */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: #818cf8;
+  /* Neutrals */
+  --color-background: #f5f1e8; /* warm ivory paper */
+  --color-surface: #fbf8f1; /* raised card */
+  --color-foreground: #1b1a17; /* ink */
+  --color-muted: #766e60; /* warm taupe text */
+  --color-border: #e5decf; /* hairline */
+  --color-border-strong: #d6cdb8;
 
-  /* Secondary colors */
-  --color-secondary: #10b981;
-  --color-secondary-hover: #059669;
+  /* Accent — forest */
+  --color-primary: #1f4a3d;
+  --color-primary-hover: #163428;
+  --color-primary-soft: #e7ede9; /* tinted surface */
+  --color-on-primary: #f5f1e8;
 
-  /* Neutral colors */
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
+  /* Secondary — brass */
+  --color-secondary: #a9874e;
+  --color-secondary-hover: #8f7140;
 
-  /* Status colors */
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-error: #ef4444;
-
-  /* Spacing */
-  --spacing-container: 1rem;
+  /* Status */
+  --color-success: #2f6b4f;
+  --color-warning: #b07a2e;
+  --color-error: #9b3b32;
+  --color-error-soft: #f3e7e3;
 }
 
-/* Dark mode support - TODO: Implement dark mode toggle */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #0f172a;
-    --color-foreground: #f8fafc;
-    --color-muted: #94a3b8;
-    --color-border: #334155;
+    --color-background: #14130f;
+    --color-surface: #1c1a15;
+    --color-foreground: #f1ece0;
+    --color-muted: #a39a88;
+    --color-border: #312d24;
+    --color-border-strong: #433d30;
+
+    --color-primary: #74b095;
+    --color-primary-hover: #8cc4ab;
+    --color-primary-soft: #1d2823;
+    --color-on-primary: #10231b;
+
+    --color-secondary: #c9a766;
+    --color-secondary-hover: #d9ba7c;
+
+    --color-success: #74b095;
+    --color-warning: #d3a352;
+    --color-error: #d98b7f;
+    --color-error-soft: #2a1f1c;
   }
 }
 
-/* Base styles */
-body {
-  background-color: var(--color-background);
-  color: var(--color-foreground);
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+    font-weight: 460;
+    letter-spacing: -0.012em;
+  }
+
+  /* Tabular numerals read well for budgets/prices */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Form fields share one quiet, focus-forest treatment */
+  input,
+  textarea,
+  select {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: color-mix(in srgb, var(--color-muted) 70%, transparent);
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 1px var(--color-primary);
+  }
+
+  input[type='checkbox'] {
+    accent-color: var(--color-primary);
+  }
 }
 
-/*
- * HINT: Use Tailwind v4 arbitrary values with CSS vars:
- * - bg-[--color-primary] for custom backgrounds
- * - text-[--color-foreground] for custom text colors
- * - p-[--spacing-container] for custom spacing
- */
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  }
+
+  /* Editorial eyebrow: small uppercase letterspaced label */
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+}
+
+/* Motion — restrained, for page-load reveals and list items */
+@keyframes anvara-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes anvara-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes anvara-collapse {
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.rise {
+  animation: anvara-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.fade {
+  animation: anvara-fade 0.5s ease both;
+}
+
+.removing {
+  animation: anvara-collapse 0.25s ease forwards;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .fade,
+  .removing {
+    animation: none;
+  }
+}

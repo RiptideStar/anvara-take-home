@@ -33,13 +33,6 @@ interface RoleInfo {
   name?: string;
 }
 
-const typeColors: Record<string, string> = {
-  DISPLAY: 'bg-blue-100 text-blue-700',
-  VIDEO: 'bg-red-100 text-red-700',
-  NEWSLETTER: 'bg-purple-100 text-purple-700',
-  PODCAST: 'bg-orange-100 text-orange-700',
-};
-
 interface Props {
   id: string;
 }
@@ -144,16 +137,16 @@ export function AdSlotDetail({ id }: Props) {
   };
 
   if (loading) {
-    return <div className="py-12 text-center text-[--color-muted]">Loading...</div>;
+    return <div className="py-12 text-center text-[var(--color-muted)]">Loading...</div>;
   }
 
   if (error || !adSlot) {
     return (
       <div className="space-y-4">
-        <Link href="/marketplace" className="text-[--color-primary] hover:underline">
+        <Link href="/marketplace" className="text-[var(--color-primary)] hover:underline">
           ← Back to Marketplace
         </Link>
-        <div className="rounded border border-red-200 bg-red-50 p-4 text-red-600">
+        <div className="rounded border border-[var(--color-border)] bg-[var(--color-error-soft)] p-4 text-[var(--color-error)]">
           {error || 'Ad slot not found'}
         </div>
       </div>
@@ -162,16 +155,16 @@ export function AdSlotDetail({ id }: Props) {
 
   return (
     <div className="space-y-6">
-      <Link href="/marketplace" className="text-[--color-primary] hover:underline">
+      <Link href="/marketplace" className="text-[var(--color-primary)] hover:underline">
         ← Back to Marketplace
       </Link>
 
-      <div className="rounded-lg border border-[--color-border] p-6">
-        <div className="mb-4 flex items-start justify-between">
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-6 sm:p-8">
+        <div className="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold">{adSlot.name}</h1>
+            <h1 className="text-3xl">{adSlot.name}</h1>
             {adSlot.publisher && (
-              <p className="text-[--color-muted]">
+              <p className="text-[var(--color-muted)]">
                 by {adSlot.publisher.name}
                 {adSlot.publisher.website && (
                   <>
@@ -181,7 +174,7 @@ export function AdSlotDetail({ id }: Props) {
                       href={adSlot.publisher.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[--color-primary] hover:underline"
+                      className="text-[var(--color-primary)] hover:underline"
                     >
                       {adSlot.publisher.website}
                     </a>
@@ -190,55 +183,62 @@ export function AdSlotDetail({ id }: Props) {
               </p>
             )}
           </div>
-          <span className={`rounded px-3 py-1 text-sm ${typeColors[adSlot.type] || 'bg-gray-100'}`}>
+          <span className="eyebrow shrink-0 rounded-full border border-[var(--color-border)] px-3 py-1.5">
             {adSlot.type}
           </span>
         </div>
 
-        {adSlot.description && <p className="mb-6 text-[--color-muted]">{adSlot.description}</p>}
+        {adSlot.description && <p className="mb-6 text-[var(--color-muted)]">{adSlot.description}</p>}
 
-        <div className="flex items-center justify-between border-t border-[--color-border] pt-4">
+        <div className="flex items-center justify-between border-t border-[var(--color-border)] pt-4">
           <div>
-            <span
-              className={`text-sm font-medium ${adSlot.isAvailable ? 'text-green-600' : 'text-[--color-muted]'}`}
-            >
-              {adSlot.isAvailable ? '● Available' : '○ Currently Booked'}
+            <span className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
+              <span
+                aria-hidden
+                className="h-1.5 w-1.5 rounded-full"
+                style={{
+                  backgroundColor: adSlot.isAvailable
+                    ? 'var(--color-success)'
+                    : 'var(--color-muted)',
+                }}
+              />
+              {adSlot.isAvailable ? 'Available' : 'Currently booked'}
             </span>
             {!adSlot.isAvailable && !bookingSuccess && (
               <button
                 onClick={handleUnbook}
-                className="ml-3 text-sm text-[--color-primary] underline hover:opacity-80"
+                className="ml-3 text-sm text-[var(--color-primary)] underline hover:opacity-80"
               >
                 Reset listing
               </button>
             )}
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-[--color-primary]">
+            <p className="font-display tnum text-3xl text-[var(--color-foreground)]">
               ${Number(adSlot.basePrice).toLocaleString()}
             </p>
-            <p className="text-sm text-[--color-muted]">per month</p>
+            <p className="eyebrow mt-1">per month</p>
           </div>
         </div>
 
         {adSlot.isAvailable && !bookingSuccess && (
-          <div className="mt-6 border-t border-[--color-border] pt-6">
-            <h2 className="mb-4 text-lg font-semibold">Request This Placement</h2>
+          <div className="mt-6 border-t border-[var(--color-border)] pt-6">
+            <h2 className="mb-4 text-xl">Request this placement</h2>
 
             {roleLoading ? (
-              <div className="py-4 text-center text-[--color-muted]">Loading...</div>
+              <div className="py-4 text-center text-[var(--color-muted)]">Loading...</div>
             ) : roleInfo?.role === 'sponsor' && roleInfo?.sponsorId ? (
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-sm font-medium text-[--color-muted]">
+                  <label className="mb-1 block text-sm font-medium text-[var(--color-muted)]">
                     Your Company
                   </label>
-                  <p className="text-[--color-foreground]">{roleInfo.name || user?.name}</p>
+                  <p className="text-[var(--color-foreground)]">{roleInfo.name || user?.name}</p>
                 </div>
                 <div>
                   <label
                     htmlFor="message"
-                    className="mb-1 block text-sm font-medium text-[--color-muted]"
+                    className="mb-1 block text-sm font-medium text-[var(--color-muted)]"
                   >
                     Message to Publisher (optional)
                   </label>
@@ -247,28 +247,28 @@ export function AdSlotDetail({ id }: Props) {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell the publisher about your campaign goals..."
-                    className="w-full rounded-lg border border-[--color-border] bg-[--color-background] px-3 py-2 text-[--color-foreground] placeholder:text-[--color-muted] focus:border-[--color-primary] focus:outline-none focus:ring-1 focus:ring-[--color-primary]"
+                    className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-[var(--color-foreground)] placeholder:text-[var(--color-muted)] focus:border-[var(--color-primary)] focus:outline-none focus:ring-1 focus:ring-[var(--color-primary)]"
                     rows={3}
                   />
                 </div>
-                {bookingError && <p className="text-sm text-red-600">{bookingError}</p>}
+                {bookingError && <p className="text-sm text-[var(--color-error)]">{bookingError}</p>}
                 <button
                   onClick={handleBooking}
                   disabled={booking}
-                  className="w-full rounded-lg bg-[--color-primary] px-4 py-3 font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                  className="w-full rounded bg-[var(--color-primary)] px-4 py-3 text-sm text-[var(--color-on-primary)] transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
                 >
-                  {booking ? 'Booking...' : 'Book This Placement'}
+                  {booking ? 'Booking…' : 'Book this placement'}
                 </button>
               </div>
             ) : (
               <div>
                 <button
                   disabled
-                  className="w-full cursor-not-allowed rounded-lg bg-gray-300 px-4 py-3 font-semibold text-gray-500"
+                  className="w-full cursor-not-allowed rounded border border-[var(--color-border)] px-4 py-3 text-sm text-[var(--color-muted)]"
                 >
-                  Request This Placement
+                  Request this placement
                 </button>
-                <p className="mt-2 text-center text-sm text-[--color-muted]">
+                <p className="mt-2 text-center text-sm text-[var(--color-muted)]">
                   {user
                     ? 'Only sponsors can request placements'
                     : 'Log in as a sponsor to request this placement'}
@@ -279,16 +279,16 @@ export function AdSlotDetail({ id }: Props) {
         )}
 
         {bookingSuccess && (
-          <div className="mt-6 rounded-lg border border-green-200 bg-green-50 p-4">
-            <h3 className="font-semibold text-green-800">Placement Booked!</h3>
-            <p className="mt-1 text-sm text-green-700">
+          <div className="mt-6 rounded-lg border border-[var(--color-border)] bg-[var(--color-primary-soft)] p-4">
+            <h3 className="text-lg text-[var(--color-primary)]">Placement booked</h3>
+            <p className="mt-1 text-sm text-[var(--color-muted)]">
               Your request has been submitted. The publisher will be in touch soon.
             </p>
             <button
               onClick={handleUnbook}
-              className="mt-3 text-sm text-green-700 underline hover:text-green-800"
+              className="mt-3 text-sm text-[var(--color-primary)] underline hover:opacity-80"
             >
-              Remove Booking (reset for testing)
+              Remove booking (reset for testing)
             </button>
           </div>
         )}

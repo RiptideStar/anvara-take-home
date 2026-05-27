@@ -4,6 +4,7 @@
 import { useActionState, useEffect } from 'react';
 import { Modal } from '@/app/components/modal';
 import { SubmitButton } from '@/app/components/submit-button';
+import { useToast } from '@/app/components/toast';
 import type { AdSlot, FormState } from '@/lib/types';
 import { createAdSlotAction, updateAdSlotAction } from '../actions';
 
@@ -18,14 +19,18 @@ interface AdSlotFormModalProps {
 
 export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
   const isEdit = Boolean(adSlot);
+  const { toast } = useToast();
   const [state, formAction] = useActionState(
     isEdit ? updateAdSlotAction : createAdSlotAction,
     initialState,
   );
 
   useEffect(() => {
-    if (state.success) onClose();
-  }, [state.success, onClose]);
+    if (state.success) {
+      toast(isEdit ? 'Ad slot updated' : 'Ad slot created');
+      onClose();
+    }
+  }, [state.success, isEdit, toast, onClose]);
 
   return (
     <Modal open onClose={onClose} title={isEdit ? 'Edit ad slot' : 'New ad slot'}>
@@ -33,7 +38,7 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
         {isEdit && <input type="hidden" name="id" value={adSlot!.id} />}
 
         {state.error && (
-          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-[--color-error]">
+          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-[var(--color-error)]">
             {state.error}
           </div>
         )}
@@ -46,23 +51,23 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
             id="name"
             name="name"
             defaultValue={adSlot?.name}
-            className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+            className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
           />
           {state.fieldErrors?.name && (
-            <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.name}</p>
+            <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.name}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="description" className="mb-1 block text-sm font-medium">
-            Description <span className="text-[--color-muted]">(optional)</span>
+            Description <span className="text-[var(--color-muted)]">(optional)</span>
           </label>
           <textarea
             id="description"
             name="description"
             rows={2}
             defaultValue={adSlot?.description}
-            className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+            className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
           />
         </div>
 
@@ -75,7 +80,7 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
               id="type"
               name="type"
               defaultValue={adSlot?.type ?? 'DISPLAY'}
-              className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+              className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
             >
               {TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -84,7 +89,7 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
               ))}
             </select>
             {state.fieldErrors?.type && (
-              <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.type}</p>
+              <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.type}</p>
             )}
           </div>
           <div>
@@ -98,10 +103,10 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
               min="0"
               step="0.01"
               defaultValue={adSlot ? Number(adSlot.basePrice) : ''}
-              className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+              className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
             />
             {state.fieldErrors?.basePrice && (
-              <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.basePrice}</p>
+              <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.basePrice}</p>
             )}
           </div>
         </div>
@@ -112,7 +117,7 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
               type="checkbox"
               name="isAvailable"
               defaultChecked={adSlot?.isAvailable}
-              className="rounded border-[--color-border]"
+              className="rounded border-[var(--color-border)]"
             />
             Available for booking
           </label>
@@ -122,7 +127,7 @@ export function AdSlotFormModal({ onClose, adSlot }: AdSlotFormModalProps) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-[--color-border] px-4 py-2 text-sm hover:bg-gray-100"
+            className="rounded border border-[var(--color-border)] px-4 py-2 text-sm transition-colors hover:bg-[var(--color-primary-soft)]"
           >
             Cancel
           </button>

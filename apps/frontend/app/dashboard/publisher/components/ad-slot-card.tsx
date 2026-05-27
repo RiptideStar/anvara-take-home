@@ -5,35 +5,36 @@ interface AdSlotCardProps {
   adSlot: AdSlot;
 }
 
-const typeColors: Record<string, string> = {
-  DISPLAY: 'bg-blue-100 text-blue-700',
-  VIDEO: 'bg-red-100 text-red-700',
-  NEWSLETTER: 'bg-purple-100 text-purple-700',
-  PODCAST: 'bg-orange-100 text-orange-700',
-};
-
 export function AdSlotCard({ adSlot }: AdSlotCardProps) {
   return (
-    <div className="rounded-lg border border-[--color-border] p-4">
-      <div className="mb-2 flex items-start justify-between">
-        <h3 className="font-semibold">{adSlot.name}</h3>
-        <span className={`rounded px-2 py-0.5 text-xs ${typeColors[adSlot.type] || 'bg-gray-100'}`}>
+    <div className="flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)]">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="text-lg leading-snug">{adSlot.name}</h3>
+        <span className="eyebrow shrink-0 rounded-full border border-[var(--color-border)] px-2 py-1">
           {adSlot.type}
         </span>
       </div>
 
       {adSlot.description && (
-        <p className="mb-3 text-sm text-[--color-muted] line-clamp-2">{adSlot.description}</p>
+        <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-[var(--color-muted)]">
+          {adSlot.description}
+        </p>
       )}
 
-      <div className="flex items-center justify-between">
-        <span
-          className={`text-sm ${adSlot.isAvailable ? 'text-green-600' : 'text-[--color-muted]'}`}
-        >
+      <div className="mt-auto flex items-end justify-between border-t border-[var(--color-border)] pt-3">
+        <span className="inline-flex items-center gap-1.5 text-sm text-[var(--color-muted)]">
+          <span
+            aria-hidden
+            className="h-1.5 w-1.5 rounded-full"
+            style={{
+              backgroundColor: adSlot.isAvailable ? 'var(--color-success)' : 'var(--color-muted)',
+            }}
+          />
           {adSlot.isAvailable ? 'Available' : 'Booked'}
         </span>
-        <span className="font-semibold text-[--color-primary]">
-          ${Number(adSlot.basePrice).toLocaleString()}/mo
+        <span className="font-display tnum text-lg text-[var(--color-foreground)]">
+          ${Number(adSlot.basePrice).toLocaleString()}
+          <span className="text-sm text-[var(--color-muted)]">/mo</span>
         </span>
       </div>
 

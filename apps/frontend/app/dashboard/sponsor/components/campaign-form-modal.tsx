@@ -4,6 +4,7 @@
 import { useActionState, useEffect } from 'react';
 import { Modal } from '@/app/components/modal';
 import { SubmitButton } from '@/app/components/submit-button';
+import { useToast } from '@/app/components/toast';
 import type { Campaign, FormState } from '@/lib/types';
 import { createCampaignAction, updateCampaignAction } from '../actions';
 
@@ -24,6 +25,7 @@ interface CampaignFormModalProps {
 
 export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps) {
   const isEdit = Boolean(campaign);
+  const { toast } = useToast();
   const [state, formAction] = useActionState(
     isEdit ? updateCampaignAction : createCampaignAction,
     initialState,
@@ -31,8 +33,11 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
 
   // Close once the mutation succeeds; revalidatePath refreshes the list.
   useEffect(() => {
-    if (state.success) onClose();
-  }, [state.success, onClose]);
+    if (state.success) {
+      toast(isEdit ? 'Campaign updated' : 'Campaign created');
+      onClose();
+    }
+  }, [state.success, isEdit, toast, onClose]);
 
   return (
     <Modal open onClose={onClose} title={isEdit ? 'Edit campaign' : 'New campaign'}>
@@ -40,7 +45,7 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
         {isEdit && <input type="hidden" name="id" value={campaign!.id} />}
 
         {state.error && (
-          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-[--color-error]">
+          <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-[var(--color-error)]">
             {state.error}
           </div>
         )}
@@ -53,23 +58,23 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
             id="name"
             name="name"
             defaultValue={campaign?.name}
-            className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+            className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
           />
           {state.fieldErrors?.name && (
-            <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.name}</p>
+            <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.name}</p>
           )}
         </div>
 
         <div>
           <label htmlFor="description" className="mb-1 block text-sm font-medium">
-            Description <span className="text-[--color-muted]">(optional)</span>
+            Description <span className="text-[var(--color-muted)]">(optional)</span>
           </label>
           <textarea
             id="description"
             name="description"
             rows={2}
             defaultValue={campaign?.description}
-            className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+            className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
           />
         </div>
 
@@ -84,10 +89,10 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
             min="0"
             step="0.01"
             defaultValue={campaign ? Number(campaign.budget) : ''}
-            className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+            className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
           />
           {state.fieldErrors?.budget && (
-            <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.budget}</p>
+            <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.budget}</p>
           )}
         </div>
 
@@ -101,10 +106,10 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
               name="startDate"
               type="date"
               defaultValue={toDateInput(campaign?.startDate)}
-              className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+              className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
             />
             {state.fieldErrors?.startDate && (
-              <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.startDate}</p>
+              <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.startDate}</p>
             )}
           </div>
           <div>
@@ -116,10 +121,10 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
               name="endDate"
               type="date"
               defaultValue={toDateInput(campaign?.endDate)}
-              className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+              className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
             />
             {state.fieldErrors?.endDate && (
-              <p className="mt-1 text-xs text-[--color-error]">{state.fieldErrors.endDate}</p>
+              <p className="mt-1 text-xs text-[var(--color-error)]">{state.fieldErrors.endDate}</p>
             )}
           </div>
         </div>
@@ -133,7 +138,7 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
               id="status"
               name="status"
               defaultValue={campaign?.status}
-              className="w-full rounded border border-[--color-border] px-3 py-2 text-sm"
+              className="w-full rounded border border-[var(--color-border)] px-3 py-2 text-sm"
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -148,7 +153,7 @@ export function CampaignFormModal({ onClose, campaign }: CampaignFormModalProps)
           <button
             type="button"
             onClick={onClose}
-            className="rounded border border-[--color-border] px-4 py-2 text-sm hover:bg-gray-100"
+            className="rounded border border-[var(--color-border)] px-4 py-2 text-sm transition-colors hover:bg-[var(--color-primary-soft)]"
           >
             Cancel
           </button>

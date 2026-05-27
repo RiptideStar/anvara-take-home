@@ -11,7 +11,7 @@ export function CreateCampaignButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded bg-[--color-primary] px-4 py-2 text-sm text-white hover:bg-[--color-primary-hover]"
+        className="rounded bg-[var(--color-primary)] px-4 py-2 text-sm text-white hover:bg-[var(--color-primary-hover)]"
       >
         + New Campaign
       </button>

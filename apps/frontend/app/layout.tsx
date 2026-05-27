@@ -1,27 +1,56 @@
 import type { Metadata } from 'next';
+import { Fraunces, Hanken_Grotesk } from 'next/font/google';
 import './globals.css';
 import { Nav } from './components/nav';
+import { ToastProvider } from './components/toast';
 
-// TODO: Add ErrorBoundary wrapper for graceful error handling
-// TODO: Consider adding a loading.tsx for Suspense boundaries
-// TODO: Add Open Graph metadata for social media sharing
-// TODO: Add Twitter Card metadata
-// TODO: Consider adding favicon and app icons
+// Display serif for headlines; quiet grotesque for body/UI.
+const fraunces = Fraunces({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-display',
+  axes: ['SOFT', 'opsz'],
+});
+
+const hanken = Hanken_Grotesk({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-sans',
+});
+
+const SITE_NAME = 'Anvara';
+const SITE_DESCRIPTION =
+  'A curated sponsorship marketplace connecting brands with premium publishers.';
 
 export const metadata: Metadata = {
-  title: 'Anvara Marketplace',
-  description: 'Sponsorship marketplace connecting sponsors with publishers',
-  // Missing: openGraph, twitter, icons, viewport, etc.
+  metadataBase: new URL('http://localhost:3847'),
+  title: {
+    default: `${SITE_NAME} — The Sponsorship Marketplace`,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  openGraph: {
+    type: 'website',
+    siteName: SITE_NAME,
+    title: `${SITE_NAME} — The Sponsorship Marketplace`,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: `${SITE_NAME} — The Sponsorship Marketplace`,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  // HINT: If using React Query, you would wrap children with QueryClientProvider here
-  // See: https://tanstack.com/query/latest/docs/framework/react/guides/advanced-ssr
   return (
-    <html lang="en">
+    <html lang="en" className={`${fraunces.variable} ${hanken.variable}`}>
       <body className="min-h-screen antialiased">
-        <Nav />
-        <main className="mx-auto max-w-6xl p-4">{children}</main>
+        <ToastProvider>
+          <Nav />
+          <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+        </ToastProvider>
       </body>
     </html>
   );

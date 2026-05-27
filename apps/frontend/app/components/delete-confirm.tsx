@@ -1,8 +1,9 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import type { FormState } from '@/lib/types';
+import { useToast } from './toast';
 
 const initialState: FormState = {};
 
@@ -12,7 +13,7 @@ function ConfirmSubmit() {
     <button
       type="submit"
       disabled={pending}
-      className="rounded bg-[--color-error] px-2 py-1 text-xs text-white hover:opacity-90 disabled:opacity-60"
+      className="rounded bg-[var(--color-error)] px-2 py-1 text-xs text-white hover:opacity-90 disabled:opacity-60"
     >
       {pending ? 'Deleting…' : 'Yes'}
     </button>
@@ -22,22 +23,29 @@ function ConfirmSubmit() {
 interface DeleteConfirmProps {
   id: string;
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
+  successMessage?: string;
 }
 
 /**
  * Inline two-step delete. The "Delete" button swaps to "Delete? Yes / No".
  * On success the parent list is revalidated and this row unmounts.
  */
-export function DeleteConfirm({ id, action }: DeleteConfirmProps) {
+export function DeleteConfirm({ id, action, successMessage = 'Deleted' }: DeleteConfirmProps) {
   const [confirming, setConfirming] = useState(false);
   const [state, formAction] = useActionState(action, initialState);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.success) toast(successMessage);
+    else if (state.error) toast(state.error, 'error');
+  }, [state.success, state.error, successMessage, toast]);
 
   if (!confirming) {
     return (
       <button
         type="button"
         onClick={() => setConfirming(true)}
-        className="rounded border border-[--color-border] px-3 py-1 text-xs text-[--color-muted] hover:bg-gray-100"
+        className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-muted)] transition-colors hover:bg-[var(--color-primary-soft)] hover:text-[var(--color-foreground)]"
       >
         Delete
       </button>
@@ -47,16 +55,16 @@ export function DeleteConfirm({ id, action }: DeleteConfirmProps) {
   return (
     <form action={formAction} className="flex items-center gap-2">
       <input type="hidden" name="id" value={id} />
-      <span className="text-xs text-[--color-muted]">Delete?</span>
+      <span className="text-xs text-[var(--color-muted)]">Delete?</span>
       <ConfirmSubmit />
       <button
         type="button"
         onClick={() => setConfirming(false)}
-        className="rounded border border-[--color-border] px-2 py-1 text-xs hover:bg-gray-100"
+        className="rounded border border-[var(--color-border)] px-2 py-1 text-xs transition-colors hover:bg-[var(--color-primary-soft)]"
       >
         No
       </button>
-      {state.error && <span className="text-xs text-[--color-error]">{state.error}</span>}
+      {state.error && <span className="text-xs text-[var(--color-error)]">{state.error}</span>}
     </form>
   );
 }

@@ -1,54 +1,55 @@
 import type { Campaign } from '@/lib/types';
+import { StatusBadge } from '@/app/components/status-badge';
 import { CampaignCardActions } from './campaign-card-actions';
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
-const statusColors: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-600',
-  ACTIVE: 'bg-green-100 text-green-700',
-  PAUSED: 'bg-yellow-100 text-yellow-700',
-  COMPLETED: 'bg-blue-100 text-blue-700',
-};
+function formatDate(value: string): string {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString('en-US', {
+    timeZone: 'UTC',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
-  const progress =
-    campaign.budget > 0 ? (Number(campaign.spent) / Number(campaign.budget)) * 100 : 0;
+  const budget = Number(campaign.budget);
+  const spent = Number(campaign.spent);
+  const progress = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
 
   return (
-    <div className="rounded-lg border border-[--color-border] p-4">
-      <div className="mb-2 flex items-start justify-between">
-        <h3 className="font-semibold">{campaign.name}</h3>
-        <span
-          className={`rounded px-2 py-0.5 text-xs ${statusColors[campaign.status] || 'bg-gray-100'}`}
-        >
-          {campaign.status}
-        </span>
+    <div className="group flex flex-col rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-5 transition-colors duration-200 hover:border-[var(--color-border-strong)]">
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <h3 className="text-lg leading-snug">{campaign.name}</h3>
+        <StatusBadge status={campaign.status} />
       </div>
 
       {campaign.description && (
-        <p className="mb-3 text-sm text-[--color-muted] line-clamp-2">{campaign.description}</p>
+        <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-[var(--color-muted)]">
+          {campaign.description}
+        </p>
       )}
 
-      <div className="mb-2">
-        <div className="flex justify-between text-sm">
-          <span className="text-[--color-muted]">Budget</span>
-          <span>
-            ${Number(campaign.spent).toLocaleString()} / ${Number(campaign.budget).toLocaleString()}
+      <div className="mb-4 mt-auto">
+        <div className="flex items-baseline justify-between text-sm">
+          <span className="eyebrow">Budget</span>
+          <span className="tnum text-[var(--color-foreground)]">
+            ${spent.toLocaleString()}{' '}
+            <span className="text-[var(--color-muted)]">/ ${budget.toLocaleString()}</span>
           </span>
         </div>
-        <div className="mt-1 h-1.5 rounded-full bg-gray-200">
-          <div
-            className="h-1.5 rounded-full bg-[--color-primary]"
-            style={{ width: `${Math.min(progress, 100)}%` }}
-          />
+        <div className="mt-2 h-px w-full bg-[var(--color-border)]">
+          <div className="h-px bg-[var(--color-primary)]" style={{ width: `${progress}%` }} />
         </div>
       </div>
 
-      <div className="text-xs text-[--color-muted]">
-        {new Date(campaign.startDate).toLocaleDateString()} -{' '}
-        {new Date(campaign.endDate).toLocaleDateString()}
+      <div className="tnum text-xs text-[var(--color-muted)]">
+        {formatDate(campaign.startDate)} — {formatDate(campaign.endDate)}
       </div>
 
       <CampaignCardActions campaign={campaign} />

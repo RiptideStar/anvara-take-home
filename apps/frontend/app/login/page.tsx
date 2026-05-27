@@ -68,25 +68,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[--color-background]">
-      <div className="w-full max-w-md rounded-lg border border-[--color-border] p-6 shadow-sm">
-        <h1 className="mb-6 text-2xl font-bold">Login to Anvara</h1>
+    <div className="flex min-h-[80vh] items-center justify-center">
+      <div className="w-full max-w-md rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] p-8 shadow-[0_8px_30px_rgba(27,26,23,0.06)]">
+        <p className="eyebrow mb-3">Welcome back</p>
+        <h1 className="mb-6 text-3xl">Sign in to Anvara</h1>
 
         {error && (
-          <div className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-red-600">
+          <div className="mb-4 rounded border border-[var(--color-border)] bg-[var(--color-error-soft)] p-3 text-sm text-[var(--color-error)]">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-[--color-foreground]">
-              Quick Login As
-            </label>
+            <label className="eyebrow mb-1.5 block">Quick login as</label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'sponsor' | 'publisher')}
-              className="mt-1 w-full rounded border border-[--color-border] bg-white px-3 py-2 text-gray-900"
+              className="mt-1 w-full rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm text-[var(--color-foreground)]"
             >
               <option value="sponsor">Sponsor (sponsor@example.com)</option>
               <option value="publisher">Publisher (publisher@example.com)</option>
@@ -96,9 +95,9 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[--color-primary] px-4 py-2 font-semibold text-white hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded bg-[var(--color-primary)] px-4 py-2.5 text-sm text-[var(--color-on-primary)] transition-colors hover:bg-[var(--color-primary-hover)] disabled:opacity-50"
           >
-            {loading ? 'Logging in...' : `Login as ${role === 'sponsor' ? 'Sponsor' : 'Publisher'}`}
+            {loading ? 'Signing in…' : `Sign in as ${role === 'sponsor' ? 'Sponsor' : 'Publisher'}`}
           </button>
         </form>
       </div>

@@ -10,15 +10,15 @@ export function AdSlotCardActions({ adSlot }: { adSlot: AdSlot }) {
   const [editing, setEditing] = useState(false);
 
   return (
-    <div className="mt-3 flex items-center gap-2 border-t border-[--color-border] pt-3">
+    <div className="mt-3 flex items-center gap-2 border-t border-[var(--color-border)] pt-3">
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="rounded border border-[--color-border] px-3 py-1 text-xs text-[--color-foreground] hover:bg-gray-100"
+        className="rounded border border-[var(--color-border)] px-3 py-1 text-xs text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-primary-soft)]"
       >
         Edit
       </button>
-      <DeleteConfirm id={adSlot.id} action={deleteAdSlotAction} />
+      <DeleteConfirm id={adSlot.id} action={deleteAdSlotAction} successMessage="Ad slot deleted" />
       {editing && <AdSlotFormModal adSlot={adSlot} onClose={() => setEditing(false)} />}
     </div>
   );

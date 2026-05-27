@@ -21,7 +21,7 @@ export function SubmitButton({ idle, pending, className }: SubmitButtonProps) {
       disabled={isPending}
       className={
         className ??
-        'rounded bg-[--color-primary] px-4 py-2 text-sm text-white hover:bg-[--color-primary-hover] disabled:cursor-not-allowed disabled:opacity-60'
+        'rounded bg-[var(--color-primary)] px-4 py-2 text-sm text-[var(--color-on-primary)] transition-colors hover:bg-[var(--color-primary-hover)] disabled:cursor-not-allowed disabled:opacity-60'
       }
     >
       {isPending ? pending : idle}

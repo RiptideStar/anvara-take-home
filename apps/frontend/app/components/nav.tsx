@@ -1,19 +1,26 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { authClient } from '@/auth-client';
 
 type UserRole = 'sponsor' | 'publisher' | null;
 
+interface NavLink {
+  href: string;
+  label: string;
+}
+
 export function Nav() {
   const { data: session, isPending } = authClient.useSession();
   const user = session?.user;
   const [role, setRole] = useState<UserRole>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
-  // Fetch user role from backend when user is logged in. Role-gated UI below is
-  // always guarded by a truthy `user`, so a stale role is never rendered after
-  // logout — no synchronous reset needed.
+  // Fetch the user's role; role-gated links are always guarded by `user`,
+  // so a stale role is never rendered after logout.
   useEffect(() => {
     if (!user?.id) return;
 
@@ -32,73 +39,135 @@ export function Nav() {
     };
   }, [user?.id]);
 
-  // TODO: Add active link styling using usePathname() from next/navigation
-  // The current page's link should be highlighted differently
+  const links: NavLink[] = [{ href: '/marketplace', label: 'Marketplace' }];
+  if (user && role === 'sponsor') links.push({ href: '/dashboard/sponsor', label: 'My Campaigns' });
+  if (user && role === 'publisher')
+    links.push({ href: '/dashboard/publisher', label: 'My Ad Slots' });
+
+  function isActive(href: string) {
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
+  async function signOut() {
+    await authClient.signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          window.location.href = '/';
+        },
+      },
+    });
+  }
 
   return (
-    <header className="border-b border-[--color-border]">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between p-4">
-        <Link href="/" className="text-xl font-bold text-[--color-primary]">
+    <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-[var(--color-background)]/85 backdrop-blur-sm">
+      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+        <Link
+          href="/"
+          className="font-display text-2xl tracking-tight text-[var(--color-foreground)]"
+          style={{ fontWeight: 500 }}
+        >
           Anvara
         </Link>
 
-        <div className="flex items-center gap-6">
-          <Link
-            href="/marketplace"
-            className="text-[--color-muted] hover:text-[--color-foreground]"
-          >
-            Marketplace
-          </Link>
-
-          {user && role === 'sponsor' && (
+        {/* Desktop */}
+        <div className="hidden items-center gap-8 md:flex">
+          {links.map((l) => (
             <Link
-              href="/dashboard/sponsor"
-              className="text-[--color-muted] hover:text-[--color-foreground]"
+              key={l.href}
+              href={l.href}
+              className={`text-sm transition-colors hover:text-[var(--color-foreground)] ${
+                isActive(l.href)
+                  ? 'text-[var(--color-foreground)]'
+                  : 'text-[var(--color-muted)]'
+              }`}
             >
-              My Campaigns
+              <span className="relative">
+                {l.label}
+                {isActive(l.href) && (
+                  <span className="absolute -bottom-1.5 left-0 h-px w-full bg-[var(--color-secondary)]" />
+                )}
+              </span>
             </Link>
-          )}
-          {user && role === 'publisher' && (
-            <Link
-              href="/dashboard/publisher"
-              className="text-[--color-muted] hover:text-[--color-foreground]"
-            >
-              My Ad Slots
-            </Link>
-          )}
+          ))}
 
           {isPending ? (
-            <span className="text-[--color-muted]">...</span>
+            <span className="text-sm text-[var(--color-muted)]">···</span>
           ) : user ? (
             <div className="flex items-center gap-4">
-              <span className="text-sm text-[--color-muted]">
-                {user.name} {role && `(${role})`}
+              <span className="text-sm text-[var(--color-muted)]">
+                {user.name}
+                {role && <span className="text-[var(--color-muted)]/70"> · {role}</span>}
               </span>
               <button
-                onClick={async () => {
-                  await authClient.signOut({
-                    fetchOptions: {
-                      onSuccess: () => {
-                        window.location.href = '/';
-                      },
-                    },
-                  });
-                }}
-                className="rounded bg-gray-600 px-3 py-1.5 text-sm text-white hover:bg-gray-500"
+                onClick={signOut}
+                className="rounded border border-[var(--color-border)] px-3 py-1.5 text-sm text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-primary-soft)]"
               >
-                Logout
+                Log out
               </button>
             </div>
           ) : (
             <Link
               href="/login"
-              className="rounded bg-[--color-primary] px-4 py-2 text-sm text-white hover:bg-[--color-primary-hover]"
+              className="rounded bg-[var(--color-primary)] px-4 py-2 text-sm text-[var(--color-on-primary)] transition-colors hover:bg-[var(--color-primary-hover)]"
             >
-              Login
+              Sign in
             </Link>
           )}
         </div>
+
+        {/* Mobile toggle */}
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          className="flex h-9 w-9 items-center justify-center rounded border border-[var(--color-border)] md:hidden"
+        >
+          <span className="text-lg leading-none">{menuOpen ? '✕' : '☰'}</span>
+        </button>
       </nav>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="fade border-t border-[var(--color-border)] bg-[var(--color-background)] px-4 py-4 md:hidden">
+          <div className="flex flex-col gap-1">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenuOpen(false)}
+                className={`rounded px-3 py-2.5 text-sm ${
+                  isActive(l.href)
+                    ? 'bg-[var(--color-primary-soft)] text-[var(--color-foreground)]'
+                    : 'text-[var(--color-muted)]'
+                }`}
+              >
+                {l.label}
+              </Link>
+            ))}
+            <div className="mt-2 border-t border-[var(--color-border)] pt-3">
+              {user ? (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-[var(--color-muted)]">{user.name}</span>
+                  <button
+                    onClick={signOut}
+                    className="rounded border border-[var(--color-border)] px-3 py-1.5 text-sm"
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="block rounded bg-[var(--color-primary)] px-4 py-2.5 text-center text-sm text-[var(--color-on-primary)]"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
